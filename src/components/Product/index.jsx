@@ -1,10 +1,8 @@
-import { useEffect, useState } from "react";
-
-import productsApi from "apis/products";
 import { Header, PageNotFound, AddToCart } from "components/commons";
 import useSelectedQuantity from "components/hooks/useSelectedQuantity";
+import { useShowProduct } from "hooks/reactQuery/useProductsApi";
 import { Typography, Spinner, Button } from "neetoui";
-import { append, isNotNil } from "ramda";
+import { isNotNil } from "ramda";
 import { useParams } from "react-router-dom";
 import routes from "routes";
 
@@ -15,20 +13,7 @@ const Product = () => {
 
   const { selectedQuantity, setSelectedQuantity } = useSelectedQuantity(slug);
 
-  const [isError, setIsError] = useState(false);
-  const [product, setProduct] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchProduct = async () => {
-    try {
-      const response = await productsApi.show(slug);
-      setProduct(response);
-    } catch {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: product = {}, isLoading, isError } = useShowProduct(slug);
 
   const {
     name,
@@ -39,12 +24,11 @@ const Product = () => {
     imageUrl,
     availableQuantity,
   } = product;
+
+  console.log("imageUrls", imageUrls);
+
   const totalDiscounts = mrp - offerPrice;
   const discountPercentage = ((totalDiscounts / mrp) * 100).toFixed(1);
-
-  useEffect(() => {
-    fetchProduct();
-  }, []);
 
   if (isError) return <PageNotFound />;
 
@@ -63,7 +47,7 @@ const Product = () => {
         <div className="w-2/5">
           <div className="flex justify-center gap-16">
             {isNotNil(imageUrls) ? (
-              <Carousel imageUrls={append(imageUrl, imageUrls)} title={name} />
+              <Carousel />
             ) : (
               <img alt={name} className="w-48" src={imageUrl} />
             )}
