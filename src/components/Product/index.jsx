@@ -2,14 +2,18 @@ import { useEffect, useState } from "react";
 
 import productsApi from "apis/products";
 import { Header, PageNotFound, AddToCart } from "components/commons";
-import { Typography, Spinner } from "neetoui";
+import useSelectedQuantity from "components/hooks/useSelectedQuantity";
+import { Typography, Spinner, Button } from "neetoui";
 import { append, isNotNil } from "ramda";
 import { useParams } from "react-router-dom";
+import routes from "routes";
 
 import Carousel from "./Carousel";
 
 const Product = () => {
   const { slug } = useParams();
+
+  const { selectedQuantity, setSelectedQuantity } = useSelectedQuantity(slug);
 
   const [isError, setIsError] = useState(false);
   const [product, setProduct] = useState({});
@@ -74,7 +78,16 @@ const Product = () => {
           <Typography className="font-semibold text-green-600">
             {discountPercentage}% off
           </Typography>
-          <AddToCart {...{ slug, availableQuantity }} />
+          <div className="flex space-x-10">
+            <AddToCart {...{ availableQuantity, slug }} />
+            <Button
+              className="bg-neutral-800 hover:bg-neutral-950"
+              label="Buy now"
+              size="large"
+              to={routes.checkout}
+              onClick={() => setSelectedQuantity(selectedQuantity || 1)}
+            />
+          </div>
         </div>
       </div>
     </>
